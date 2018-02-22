@@ -1,0 +1,87 @@
+Turbo Assembler	 Version 4.1	    02/18/17 16:57:18	    Page 1
+lab2.asm
+
+
+
+      1	0000			     .MODEL TINY
+      2				     ;.STACK 266
+      3	0000			     .DATA
+      4
+      5	0000  0A		     NUM     DB	0AH
+      6	0001  ??		     RESULT  DB	?
+      7
+      8	0002			     .CODE
+      9				     .STARTUP
+1    10	0100			     @Startup:
+     11
+     12				     ;MAIN    PROC FAR
+     13
+     14	0100  B8 0000s			     MOV AX,@data    ;initialize DS to address
+     15
+     16	0103  8E D8			     MOV DS, AX	     ;of data segment
+     17
+     18	0105  8E C0			     MOV ES, AX	     ; make es=ds
+     19
+     20	0107  BA 0000			     MOV DX, 0000H
+     21
+     22	010A  B8 05FF			     MOV AX, 05ffH
+     23
+     24	010D  BB 1000			     MOV BX, 1000H
+     25
+     26	0110  B1 05			     MOV CL, 05H
+     27
+     28	0112  BE 0000r			     MOV SI, offset NUM
+     29
+     30	0115  BF 0001r			     MOV DI, offset RESULT
+     31
+     32	0118  8A 04			     MOV AL, [SI]
+     33
+     34	011A  02 E0			     ADD AH, AL
+     35
+     36	011C  88 25			     MOV [DI], AH
+     37
+     38	011E  8B D6			     MOV DX, offset SI
+     39
+     40	0120  8B DA			     Mov BX, DX
+     41
+     42					     .Exit
+1    43	0122  B4 4C			     MOV     AH,4Ch
+1    44	0124  CD 21			     INT     21h
+     45
+     46				     ;MAIN    ENDP
+     47
+     48				     END
+Turbo Assembler	 Version 4.1	    02/18/17 16:57:18	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "02/18/17"
+??FILENAME			  Text	 "lab2	  "
+??TIME				  Text	 "16:57:18"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 DGROUP
+@CODESIZE			  Text	 0
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 LAB2
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 1
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 DGROUP:0100
+@WORDSIZE			  Text	 2
+NUM				  Byte	 DGROUP:0000
+RESULT				  Byte	 DGROUP:0001
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0002 Word	  Public  DATA
+  _TEXT				  16  0126 Word	  Public  CODE
+

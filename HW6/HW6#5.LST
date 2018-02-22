@@ -1,0 +1,94 @@
+Turbo Assembler	 Version 4.1	    04/09/17 18:41:48	    Page 1
+hw6#5.asm
+
+
+
+      1	0000			     .MODEL MEDIUM
+      2	0000			     .STACK 100H
+      3	0000			     .DATA
+      4
+      5	0000  ????		     k dw ?
+      6	0002  01F4*(????)	     p dw 500 dup (?)
+      7
+      8	03EA			     .code
+      9				     ;to do
+     10				     .STARTUP
+1    11	0000			     @Startup:
+1    12	0000  BA 0000s			     MOV     DX,@data
+1    13	0003  8E DA			     MOV     DS,DX
+1    14	0005  8C D3			     MOV     BX,SS
+1    15	0007  2B DA			     SUB     BX,DX
+1    16	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     17	      E3
+1    18	0011  FA			     CLI
+1    19	0012  8E D2			     MOV     SS,DX
+1    20	0014  03 E3			     ADD     SP,BX
+1    21	0016  FB			     STI
+     22
+     23	0017			     MAIN PROC FAR
+     24	0017  C7 06 0000r 0000	     mov k, 0
+     25	001D  B9 01F4		     mov cx, 500
+     26	0020  BE 0000		     mov si, 0
+     27	0023  A1 0000r		     start: mov	ax, k
+     28	0026  81 3E 0000r 012C	     cmp k, 300
+     29	002C  7F 06		     jg	minus
+     30
+     31	002E			     plus:
+     32	002E  01 84 0002r	     add p[si],	ax
+     33	0032  EB 04		     jmp next
+     34
+     35	0034			     minus:
+     36	0034  29 84 0002r	     sub p[si],	ax
+     37
+     38	0038			     next:
+     39	0038  FF 06 0000r	     inc k ; k++
+     40	003C  46		     inc si
+     41	003D  46		     inc si
+     42	003E  E2 E3		     loop start
+     43
+     44				     .EXIT
+1    45	0040  B4 4C			     MOV     AH,4Ch
+1    46	0042  CD 21			     INT     21h
+     47	0044			     MAIN ENDP
+     48
+     49				     END
+Turbo Assembler	 Version 4.1	    04/09/17 18:41:48	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "04/09/17"
+??FILENAME			  Text	 "hw6#5	  "
+??TIME				  Text	 "18:41:48"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 HW6#5_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 HW6#5_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 HW6#5
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 HW6#5_TEXT:0000
+@WORDSIZE			  Text	 2
+K				  Word	 DGROUP:0000
+MAIN				  Far	 HW6#5_TEXT:0017
+MINUS				  Near	 HW6#5_TEXT:0034
+NEXT				  Near	 HW6#5_TEXT:0038
+P				  Word	 DGROUP:0002
+PLUS				  Near	 HW6#5_TEXT:002E
+START				  Near	 HW6#5_TEXT:0023
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  03EA Word	  Public  DATA
+HW6#5_TEXT			  16  0044 Word	  Public  CODE
+

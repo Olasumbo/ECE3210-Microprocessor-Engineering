@@ -1,0 +1,223 @@
+Turbo Assembler	 Version 4.1	    03/08/17 18:24:28	    Page 1
+Lab4.asm
+
+
+
+      1				     ;LAB 4 PROGRAM
+      2
+      3				     ;FILENAME:	lab4.asm
+      4
+      5				     ;FILE TYPE: EXE
+      6
+      7	0000			     .MODEL MEDIUM
+      8
+      9	0000			     .STACK 1024
+     10
+     11	0000			     .DATA
+     12
+     13	0000  14			  Buffer   DB 20
+     14
+     15	0001  ??			  NUM	   DB ?
+     16
+     17	0002  14*(24)			  ACT_BUF  DB 20 DUP('$')
+     18
+     19	0016  0D 0A 45 6E 74 65	72+	  MSG	   DB 0DH,0AH,'Enter an	algebraic command line:',0DH,0AH,'$'
+     20	      20 61 6E 20 61 6C	67+
+     21	      65 62 72 61 69 63	20+
+     22	      63 6F 6D 6D 61 6E	64+
+     23	      20 6C 69 6E 65 3A	0D+
+     24	      0A 24
+     25
+     26	003B  0D 0A 24			  NEWLINE  DB 0DH,0AH,'$'
+     27
+     28	003E  45 72 72 6F 72 2C	20+	  ERROR	   DB 'Error, invalid input',0DH,0AH,'Input format: Operand1 Operator Operand2',0DH,+
+     29	      69 6E 76 61 6C 69	64+  0AH,'Operand: decimal numbers',0DH,0AH,'Operator: + - * / %$',0DH,0AH
+     30	      20 69 6E 70 75 74	0D+
+     31	      0A 49 6E 70 75 74	20+
+     32	      66 6F 72 6D 61 74	3A+
+     33	      20 4F 70 65 72 61	6E+
+     34	      64 31 20 4F 70 65	72+
+     35	      61 74 6F 72 20 4F	70+
+     36	      65 72 61 6E 64 32	0D+
+     37	      0A 4F 70 65 72 61	6E+
+     38	      64 3A 20 64 65 63	69+
+     39	      6D 61 6C 20 6E 75	6D+
+     40	      62 65 72 73 0D 0A	4F+
+     41	      70 65 72 61 74 6F	72+
+     42	      3A 20 2B 20 2D 20	2A+
+     43	      20 2F 20 25 24 0D	0A
+     44
+     45	00AE  0000			  Op1	   DW 0
+     46
+     47	00B0  00			  Op1Sign  DB 0
+     48
+     49	00B1  00			  Operator DB 0
+     50
+     51	00B2  0000			  Op2	   DW 0
+     52
+     53	00B4  00			  OP2Sign  DB 0
+     54
+     55	00B5  0000			  Results  DW 0
+     56
+     57
+Turbo Assembler	 Version 4.1	    03/08/17 18:24:28	    Page 2
+Lab4.asm
+
+
+
+     58					  ; TO DO :
+     59
+     60					  ;  Add your data structure to	hold the input parameters :
+     61
+     62					  ;  Operand1, sign of Operand1, Operator, Operand2 , sign of Operand2,	results
+     63
+     64					  ; ==Hint== What  did you  do in Lab3 to  store your counters !!
+     65
+     66
+     67
+     68
+     69
+     70
+     71
+     72
+     73
+     74	00B7			     .CODE
+     75
+     76					  .STARTUP
+1    77	0000			     @Startup:
+1    78	0000  BA 0000s			     MOV     DX,@data
+1    79	0003  8E DA			     MOV     DS,DX
+1    80	0005  8C D3			     MOV     BX,SS
+1    81	0007  2B DA			     SUB     BX,DX
+1    82	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     83	      E3
+1    84	0011  FA			     CLI
+1    85	0012  8E D2			     MOV     SS,DX
+1    86	0014  03 E3			     ADD     SP,BX
+1    87	0016  FB			     STI
+     88
+     89	0017			     MAIN PROC FAR
+     90
+     91	0017  B8 0000s			       MOV AX,@DATA	    ;startup
+     92
+     93	001A  8E D8			       MOV DS,AX
+     94
+     95	001C  8E C0			       MOV ES,AX
+     96
+     97
+     98
+     99	001E  BA 0016r			       LEA DX,MSG	    ;display prompt message
+    100
+    101	0021  B4 09			       MOV AH,09h
+    102
+    103	0023  CD 21			       INT 21h
+    104
+    105
+    106					       ;Enter String
+    107
+    108	0025  B4 0A			       MOV  AH,0AH
+    109
+    110	0027  BA 0000r			       MOV  DX,OFFSET Buffer
+    111
+    112	002A  CD 21			       INT 21H
+    113
+    114					       ;Display	 new line
+Turbo Assembler	 Version 4.1	    03/08/17 18:24:28	    Page 3
+Lab4.asm
+
+
+
+    115
+    116	002C  BA 003Br			       MOV DX, OFFSET NEWLINE
+    117
+    118	002F  B4 09			       MOV AH,09H
+    119
+    120	0031  CD 21			       INT 21H
+    121
+    122					       ;Display	the entered string
+    123	0033  BA 0002r			       MOV DX, OFFSET ACT_BUF
+    124
+    125	0036  B4 09			       MOV AH, 09H
+    126
+    127	0038  CD 21			       INT 21H
+    128
+    129					       ; Display  new line
+    130
+    131	003A  BA 003Br			       MOV DX, OFFSET NEWLINE
+    132
+    133	003D  B4 09			       MOV AH,09H
+    134
+    135	003F  CD 21			       INT 21H
+    136
+    137					       ; - TO DO - Add your code here to
+    138
+    139					       ; 1. Read input	string form Keybaord ; example : -12 / -3
+    140
+    141					       ; 2. Print  the enteretd	string on screen
+    142
+    143					       ; 3. Highlight Operand1&2, sign of Operand1&2, Operator,	and results in memory, see  +
+    144				     Figure 4-1	in lab4	Assignment sheet.
+    145
+    146
+    147
+    148
+    149
+    150
+    151
+    152
+    153
+    154
+    155
+    156					.EXIT
+1   157	0041  B4 4C			     MOV     AH,4Ch
+1   158	0043  CD 21			     INT     21h
+    159
+    160	0045			     MAIN ENDP
+    161
+    162				     END
+Turbo Assembler	 Version 4.1	    03/08/17 18:24:28	    Page 4
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/08/17"
+??FILENAME			  Text	 "Lab4	  "
+??TIME				  Text	 "18:24:28"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 LAB4_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 LAB4_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 LAB4
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 LAB4_TEXT:0000
+@WORDSIZE			  Text	 2
+ACT_BUF				  Byte	 DGROUP:0002
+BUFFER				  Byte	 DGROUP:0000
+ERROR				  Byte	 DGROUP:003E
+MAIN				  Far	 LAB4_TEXT:0017
+MSG				  Byte	 DGROUP:0016
+NEWLINE				  Byte	 DGROUP:003B
+NUM				  Byte	 DGROUP:0001
+OP1				  Word	 DGROUP:00AE
+OP1SIGN				  Byte	 DGROUP:00B0
+OP2				  Word	 DGROUP:00B2
+OP2SIGN				  Byte	 DGROUP:00B4
+OPERATOR			  Byte	 DGROUP:00B1
+RESULTS				  Word	 DGROUP:00B5
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0400 Para	  Stack	  STACK
+  _DATA				  16  00B7 Word	  Public  DATA
+LAB4_TEXT			  16  0045 Word	  Public  CODE
+

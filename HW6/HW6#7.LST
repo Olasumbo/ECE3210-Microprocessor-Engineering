@@ -1,0 +1,80 @@
+Turbo Assembler	 Version 4.1	    04/09/17 18:58:52	    Page 1
+hw6#7.asm
+
+
+
+      1	0000			     .MODEL MEDIUM
+      2	0000			     .STACK 100H
+      3
+      4	0000			     .DATA
+      5	0000  FFD3 03E8	FFDE 05DC +  MYARRAY DW	-45, 1000, -34,	1500, 20, 60
+      6	      0014 003C
+      7	      =0006		     COUNT EQU 6 ; SIX ELEMENTS	IN THE ARRAY
+      8	000C  0000		     RESULT DW 0
+      9
+     10	000E			     .CODE
+     11	0000  B8 0000s			MOV AX,@DATA
+     12	0003  8E D8			MOV DS,	AX
+     13	0005  B9 0006			MOV CX,	COUNT
+     14	0008  BE 0000r			LEA SI,	MYARRAY	;LOAD EFFECTIVE	ADDRESS	OF ARRAY
+     15					;CALL FINDMIN
+     16					;TO DO
+     17
+     18	000B  8A 24			MOV AH,BYTE PTR[SI]
+     19	000D  3A 04		     LOOP1:CMP AL,BYTE PTR[SI]
+     20	000F  73 02			  JNC LOOP2    ; IF NO CARRY MOVE TO NEXT LOOP
+     21	0011  8A 04			  MOV AL,BYTE PTR[SI];IF CARRY EXISTS NUMBER WILL MOVE TO AL
+     22
+     23	0013  3A 24		     LOOP2:CMP AH,BYTE PTR[SI]
+     24	0015  72 02			  JC LOOP3;
+     25	0017  8A 24			  MOV AH,BYTE PTR[SI]
+     26
+     27	0019  46		     LOOP3:INC SI      ;INCREMENT SI FOR NEXT VALUE IN THE ARRAY
+     28	001A  49			  DEC CX       ;COUNTER	DECREMENT
+     29	001B  83 F9 00			  CMP CX,00    ;CHECK WHEATHER ARRAY FINISHED
+     30	001E  75 ED			  JNZ LOOP1    ;ELSE JUMP TO LOOP1
+     31	0020  B4 4C			  MOV AH,4CH
+     32	0022  CD 21			  INT 21H
+     33
+     34					  .EXIT
+1    35	0024  B4 4C			     MOV     AH,4Ch
+1    36	0026  CD 21			     INT     21h
+     37				     END
+Turbo Assembler	 Version 4.1	    04/09/17 18:58:52	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "04/09/17"
+??FILENAME			  Text	 "hw6#7	  "
+??TIME				  Text	 "18:58:52"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 HW6#7_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 HW6#7_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 HW6#7
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+COUNT				  Number 0006
+LOOP1				  Near	 HW6#7_TEXT:000D
+LOOP2				  Near	 HW6#7_TEXT:0013
+LOOP3				  Near	 HW6#7_TEXT:0019
+MYARRAY				  Word	 DGROUP:0000
+RESULT				  Word	 DGROUP:000C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  000E Word	  Public  DATA
+HW6#7_TEXT			  16  0028 Word	  Public  CODE
+

@@ -1,0 +1,129 @@
+Turbo Assembler	 Version 4.1	    04/09/17 19:10:38	    Page 1
+7try2.asm
+
+
+
+      1	0000			     .MODEL MEDIUM
+**Error** 7try2.asm(1) Labels can't start with numeric characters: 7TRY2_TEXT
+      2	0000			     .STACK 100H
+      3
+      4	0000			     .DATA
+      5	0000  FFD3 03E8	FFDE 05DC +  MYARRAY DW	-45, 1000, -34,	1500, 20, 60
+      6	      0014 003C
+      7	      =0006		     COUNT EQU 6 ; SIX ELEMENTS	IN THE ARRAY
+      8	000C  0000		     RESULT DW 0
+      9
+     10	000E			     .CODE
+**Error** 7try2.asm(9) Labels can't start with numeric characters: 7TRY2_TEXT
+     11				     .STARTUP
+1    12	*000			     @Startup:
+     13	*000			     MAIN PROC FAR
+     14	      B8 0000s		     MOV AX,@DATA
+**Error** 7try2.asm(12)	Code or	data emission to undeclared segment
+     15	      8E D8		     MOV DS,AX
+**Error** 7try2.asm(13)	Code or	data emission to undeclared segment
+     16	      B9 0006		     MOV CX, COUNT
+**Error** 7try2.asm(14)	Code or	data emission to undeclared segment
+     17	      BE 0000r		     LEA SI, MYARRAY
+**Error** 7try2.asm(15)	Code or	data emission to undeclared segment
+     18	      E8 FFFD		     CALL FINDMIN
+**Error** 7try2.asm(16)	Undefined symbol: FINDMIN
+     19				     ;to do
+     20	      A3 000Cr		     MOV RESULT, ax
+**Error** 7try2.asm(18)	Code or	data emission to undeclared segment
+     21				     .EXIT MAIN	ENDP
+**Error** 7try2.asm(19)	Illegal	forward	reference: MAIN
+**Error** 7try2.asm(19)	Undefined symbol: MAIN
+     22
+     23	*000			     FINDMIN PROC NEAR
+     24	      8B 04		     MOV AX, [SI]
+**Error** 7try2.asm(22)	Code or	data emission to undeclared segment
+     25	      49		     DEC CX
+**Error** 7try2.asm(23)	Code or	data emission to undeclared segment
+     26	*000  46		     BEGIN: INC	SI
+**Error** 7try2.asm(24)	Code or	data emission to undeclared segment
+     27	      46		     INC SI
+**Error** 7try2.asm(25)	Code or	data emission to undeclared segment
+     28	      3B 04		     CMP AX, [SI]
+**Error** 7try2.asm(26)	Code or	data emission to undeclared segment
+     29	      7C FE		     JL	L1
+**Error** 7try2.asm(27)	Undefined symbol: L1
+     30	      8B 04		     MOV AX, [SI]
+**Error** 7try2.asm(28)	Code or	data emission to undeclared segment
+     31	*000  E2 FE		     L1: LOOP BEGIN
+**Error** 7try2.asm(29)	Undefined symbol: BEGIN
+     32	      C3		     RET
+**Error** 7try2.asm(30)	Code or	data emission to undeclared segment
+     33	*000			     FINDMIN ENDP
+     34				     END
+Turbo Assembler	 Version 4.1	    04/09/17 19:10:38	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "04/09/17"
+??FILENAME			  Text	 "7try2	  "
+??TIME				  Text	 "19:10:38"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 7TRY2_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _DATA
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 7TRY2
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+COUNT				  Number 0006
+MYARRAY				  Word	 DGROUP:0000
+RESULT				  Word	 DGROUP:000C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  000E Word	  Public  DATA
+Turbo Assembler	 Version 4.1	    04/09/17 19:10:38	    Page 3
+Error Summary
+
+
+
+**Error** 7try2.asm(1) Labels can't start with numeric characters: 7TRY2_TEXT
+**Error** 7try2.asm(9) Labels can't start with numeric characters: 7TRY2_TEXT
+**Error** 7try2.asm(10)	STARTUP(2) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(3) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(4) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(5) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(6) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(7) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(8) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(9) Code	or data	emission to undeclared segment
+**Error** 7try2.asm(10)	STARTUP(10) Code or data emission to undeclared	segment
+**Error** 7try2.asm(12)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(13)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(14)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(15)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(16)	Undefined symbol: FINDMIN
+**Error** 7try2.asm(18)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(19)	Illegal	forward	reference: MAIN
+**Error** 7try2.asm(19)	Undefined symbol: MAIN
+**Error** 7try2.asm(19)	EXIT(1)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(19)	EXIT(2)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(22)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(23)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(24)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(25)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(26)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(27)	Undefined symbol: L1
+**Error** 7try2.asm(28)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(29)	Undefined symbol: BEGIN
+**Error** 7try2.asm(30)	Code or	data emission to undeclared segment
+**Error** 7try2.asm(32)	END(1) Undefined symbol: @STARTUP
+*Warning* 7try2.asm(32)	END(1) Open procedure: MAIN
+

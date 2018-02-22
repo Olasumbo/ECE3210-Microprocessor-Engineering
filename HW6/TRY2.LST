@@ -1,0 +1,95 @@
+Turbo Assembler	 Version 4.1	    04/09/17 19:20:42	    Page 1
+try2.asm
+
+
+
+      1	0000			     .MODEL MEDIUM
+      2	0000			     .STACK 100H
+      3
+      4	0000			     .DATA
+      5	0000  FFD3 03E8	FFDE 05DC +  MYARRAY DW	-45, 1000, -34,	1500, 20, 60
+      6	      0014 003C
+      7	      =0006		     COUNT EQU 6 ; SIX ELEMENTS	IN THE ARRAY
+      8	000C  0000		     RESULT DW 0
+      9
+     10	000E			     .CODE
+     11				     .STARTUP
+1    12	0000			     @Startup:
+1    13	0000  BA 0000s			     MOV     DX,@data
+1    14	0003  8E DA			     MOV     DS,DX
+1    15	0005  8C D3			     MOV     BX,SS
+1    16	0007  2B DA			     SUB     BX,DX
+1    17	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     18	      E3
+1    19	0011  FA			     CLI
+1    20	0012  8E D2			     MOV     SS,DX
+1    21	0014  03 E3			     ADD     SP,BX
+1    22	0016  FB			     STI
+     23
+     24	0017			     MAIN PROC FAR
+     25	0017  B8 0000s		     MOV AX,@DATA
+     26	001A  8E D8		     MOV DS,AX
+     27	001C  B9 0006		     MOV CX, COUNT
+     28	001F  BE 0000r		     LEA SI, MYARRAY
+     29	0022  E8 0007		     CALL FINDMIN
+     30				     ;to do
+     31	0025  A3 000Cr		     MOV RESULT, ax
+     32				     .EXIT
+1    33	0028  B4 4C			     MOV     AH,4Ch
+1    34	002A  CD 21			     INT     21h
+     35	002C			     MAIN ENDP
+     36
+     37
+     38	002C			     FINDMIN PROC NEAR
+     39	002C  8B 04		     MOV AX, [SI]
+     40	002E  49		     DEC CX
+     41	002F  46		     BEGIN: INC	SI
+     42	0030  46		     INC SI
+     43	0031  3B 04		     CMP AX, [SI]
+     44	0033  7C 02		     JL	L1
+     45	0035  8B 04		     MOV AX, [SI]
+     46	0037  E2 F6		     L1: LOOP BEGIN
+     47	0039  C3		     RET
+     48	003A			     FINDMIN ENDP
+     49
+     50				     END
+Turbo Assembler	 Version 4.1	    04/09/17 19:20:42	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "04/09/17"
+??FILENAME			  Text	 "try2	  "
+??TIME				  Text	 "19:20:42"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 TRY2_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 TRY2_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 TRY2
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 TRY2_TEXT:0000
+@WORDSIZE			  Text	 2
+BEGIN				  Near	 TRY2_TEXT:002F
+COUNT				  Number 0006
+FINDMIN				  Near	 TRY2_TEXT:002C
+L1				  Near	 TRY2_TEXT:0037
+MAIN				  Far	 TRY2_TEXT:0017
+MYARRAY				  Word	 DGROUP:0000
+RESULT				  Word	 DGROUP:000C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  000E Word	  Public  DATA
+TRY2_TEXT			  16  003A Word	  Public  CODE
+

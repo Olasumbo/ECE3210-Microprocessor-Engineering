@@ -1,0 +1,158 @@
+Turbo Assembler	 Version 4.1	    03/12/17 21:38:15	    Page 1
+trial.asm
+
+
+
+      1	0000			     .MODEL  MEDIUM
+      2	0000			     .STACK  1024
+      3	0000			     .DATA
+      4
+      5	0000  42 59 54 45 41 52	45+	  Instring     DB   'BYTEAREA:$',0AH, 0DH
+      6	      41 3A 24 0A 0D
+      7	000C  0A 0D 24			  Break	       DB   0AH,0DH,'$'	 ; new line
+      8	000F  64			  Buffer       DB   100		; max number(100) of chars expected
+      9	0010  ??			  Num	       DB   ?		; returns the number of	chars typed
+     10	0011  64*(24)			  Act_Buf      DB   100	DUP ('$') ; actual buffer w/ size=?max number?
+     11	0075  0400*(24)			  byteArea     DB   1024 DUP('$')
+     12	0475  0D 0A 20 45 6E 74	65+	  MSG	       DB   0DH,0AH,' Enter Input String:',0DH,0AH,'$'
+     13	      72 20 49 6E 70 75	74+
+     14	      20 53 74 72 69 6E	67+
+     15	      3A 0D 0A 24
+     16	048E  64			  byte1	       DB   100
+     17	048F  64			  stringIN     DB   100
+     18	0490  0D 0A 24			  New_line     DB   0DH, 0AH, '$'
+     19
+     20	0493			     .code
+     21				     .startup
+1    22	0000			     @Startup:
+1    23	0000  BA 0000s			     MOV     DX,@data
+1    24	0003  8E DA			     MOV     DS,DX
+1    25	0005  8C D3			     MOV     BX,SS
+1    26	0007  2B DA			     SUB     BX,DX
+1    27	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     28	      E3
+1    29	0011  FA			     CLI
+1    30	0012  8E D2			     MOV     SS,DX
+1    31	0014  03 E3			     ADD     SP,BX
+1    32	0016  FB			     STI
+     33	0017			     MAIN PROC FAR
+     34	0017  BF 0075r			  Mov DI, offset byteArea
+     35	001A  B9 0000			  Mov cx, 00H
+     36
+     37	001D			     T1:
+     38
+     39					; Print	out MSG
+     40	001D  BA 0475r			  Mov dx, offset MSG
+     41	0020  B4 09			  Mov ah, 09H
+     42	0022  CD 21			  int 21H
+     43
+     44	0024  FC			  cld
+     45	0025  BA 048Fr			  Mov dx, offset stringIN
+     46	0028  B4 09			  mov ah, 09H
+     47	002A  CD 21			  int 21H
+     48
+     49					  ;Enter String
+     50	002C  B4 0A			  Mov  ah, 0AH
+     51	002E  BA 000Fr			  Mov  dx, offset Buffer
+     52	0031  CD 21			  INT  21H
+     53
+     54					  ;Comparing the input string and finding $
+     55	0033  BB 0011r			  Mov bx, offset ACT_BUF
+     56	0036  80 3F 24			  CMP byte ptr[BX], '$'
+     57	0039  74 21			  JE Done
+Turbo Assembler	 Version 4.1	    03/12/17 21:38:15	    Page 2
+trial.asm
+
+
+
+     58
+     59	003B  BE 0011r			  Mov si, offset ACT_BUF
+     60	003E  8A 0E 0010r		  Mov cl, Num
+     61	0042  F3> A4			  REP MOVSB
+     62
+     63	0044  C6 05 0D			  Mov byte ptr[DI], 0DH
+     64	0047  47			  INC DI
+     65	0048  C6 05 0A			  Mov byte ptr[DI], 0AH
+     66	004B  47			  INC DI
+     67
+     68					  ;Display Newline
+     69	004C  BA 0490r			  Mov dx, offset New_line
+     70	004F  B4 09			  mov ah, 09h
+     71	0051  CD 21			  int 21H
+     72
+     73	0053  BA 0075r			  Mov dx, offset byteArea
+     74	0056  B4 09			  mov ah, 09h
+     75	0058  CD 21			  int 21h
+     76	005A  EB C1			  jmp T1
+     77
+     78	005C			     Done:
+     79	005C  BA 0075r			    Mov	dx, offset byteAREA
+     80	005F  B4 09			    Mov	ah, 09h
+     81	0061  CD 21			    int	21h
+     82
+     83					    ;TODO: Display the entered string
+     84	0063  BA 000Fr			    MOV	DX, Offset Buffer
+     85	0066  B4 0A			    MOV	AH, 0AH
+     86	0068  CD 21			    INT	21H
+     87
+     88					     ;Display  "Byte Area" string
+     89					     ;MOV DX, OFFSET Instring
+     90					     ;MOV AH,09H
+     91					     ;INT 21H
+     92
+     93					     ;MOV DX, Offset Buffer
+     94					     ;MOV AH, 0AH
+     95					     ;INT 21H
+     96
+     97
+     98					    .Exit
+1    99	006A  B4 4C			     MOV     AH,4Ch
+1   100	006C  CD 21			     INT     21h
+    101	006E			     MAIN ENDP
+    102				     END
+Turbo Assembler	 Version 4.1	    03/12/17 21:38:15	    Page 3
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/12/17"
+??FILENAME			  Text	 "trial	  "
+??TIME				  Text	 "21:38:15"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 TRIAL_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 TRIAL_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 TRIAL
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 TRIAL_TEXT:0000
+@WORDSIZE			  Text	 2
+ACT_BUF				  Byte	 DGROUP:0011
+BREAK				  Byte	 DGROUP:000C
+BUFFER				  Byte	 DGROUP:000F
+BYTE1				  Byte	 DGROUP:048E
+BYTEAREA			  Byte	 DGROUP:0075
+DONE				  Near	 TRIAL_TEXT:005C
+INSTRING			  Byte	 DGROUP:0000
+MAIN				  Far	 TRIAL_TEXT:0017
+MSG				  Byte	 DGROUP:0475
+NEW_LINE			  Byte	 DGROUP:0490
+NUM				  Byte	 DGROUP:0010
+STRINGIN			  Byte	 DGROUP:048F
+T1				  Near	 TRIAL_TEXT:001D
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0400 Para	  Stack	  STACK
+  _DATA				  16  0493 Word	  Public  DATA
+TRIAL_TEXT			  16  006E Word	  Public  CODE
+

@@ -1,0 +1,708 @@
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 1
+Lab4.asm
+
+
+
+      1
+      2
+      3
+      4
+      5				     ;LAB 4 PROGRAM
+      6				     ;FILENAME:	lab4.asm
+      7				     ;FILE TYPE: EXE
+      8	0000			     .MODEL MEDIUM
+      9	0000			     .STACK 1024
+     10	0000			     .DATA
+     11	0000  14			  Buffer   DB 20
+     12	0001  ??			  NUM	   DB ?
+     13	0002  14*(24)			  ACT_BUF  DB 20 DUP('$')
+     14	0016  0D 0A 45 6E 74 65	72+	  MSG	   DB 0DH,0AH,'Enter an	algebraic command line:',0DH,0AH,'$'
+     15	      20 61 6E 20 61 6C	67+
+     16	      65 62 72 61 69 63	20+
+     17	      63 6F 6D 6D 61 6E	64+
+     18	      20 6C 69 6E 65 3A	0D+
+     19	      0A 24
+     20	003B  0D 0A 24			  NEWLINE  DB 0DH,0AH,'$'
+     21	003E  45 72 72 6F 72 2C	20+	  ERROR	   DB 'Error, invalid input',0DH,0AH,'Input format: Operand1 Operator Operand2',0DH,+
+     22	      69 6E 76 61 6C 69	64+  0AH,'Operand: decimal numbers',0DH,0AH,'Operator: + - * / %$',0DH,0AH
+     23	      20 69 6E 70 75 74	0D+
+     24	      0A 49 6E 70 75 74	20+
+     25	      66 6F 72 6D 61 74	3A+
+     26	      20 4F 70 65 72 61	6E+
+     27	      64 31 20 4F 70 65	72+
+     28	      61 74 6F 72 20 4F	70+
+     29	      65 72 61 6E 64 32	0D+
+     30	      0A 4F 70 65 72 61	6E+
+     31	      64 3A 20 64 65 63	69+
+     32	      6D 61 6C 20 6E 75	6D+
+     33	      62 65 72 73 0D 0A	4F+
+     34	      70 65 72 61 74 6F	72+
+     35	      3A 20 2B 20 2D 20	2A+
+     36	      20 2F 20 25 24 0D	0A
+     37	00AE  54 68 65 20 72 65	73+	  RES_MSG  DB 'The result is: ',0DH,0AH,'$'
+     38	      75 6C 74 20 69 73	3A+
+     39	      20 0D 0A 24
+     40	00C0  44 69 76 69 73 6F	72+	  DIV_ZERO DB 'Divisor cannot be zero!',0DH,0AH,'$'
+     41	      20 63 61 6E 6E 6F	74+
+     42	      20 62 65 20 7A 65	72+
+     43	      6F 21 0D 0A 24
+     44
+     45					  ; TO DO :
+     46					  ;  Add your data structure to	hold the input parameters :
+     47					  ;  Operand1, sign of Operand1, Operator, Operand2 , sign of Operand2,	results
+     48	00DA  2B			  sign1	       DB '+'
+     49	00DB  04*(24)			  operand1     DB 4 dup('$')
+     50	00DF  0000			  operand1_hex DW 0000h
+     51
+     52	00E1  2B			  operator     DB '+'
+     53
+     54	00E2  2B			  sign2	       DB '+'
+     55	00E3  04*(24)			  operand2     DB 4 dup('$')
+     56	00E7  0000			  operand2_hex DW 0000h
+     57
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 2
+Lab4.asm
+
+
+
+     58	00E9  00			  results      DB 0
+     59					  ; ==Hint== What  did you  do in Lab3 to  store your counters !!
+     60
+     61	00EA  0000			  MULT1	       DW 0000h
+     62	00EC  0000			  HEX_RES      DW 0000h
+     63	00EE  07*(00)			  ASC_RES      DB 7 dup(0)
+     64	00F5  2B			  RES_SIGN     DB '+'
+     65
+     66	00F6			     .CODE
+     67					  .STARTUP
+1    68	0000			     @Startup:
+1    69	0000  BA 0000s			     MOV     DX,@data
+1    70	0003  8E DA			     MOV     DS,DX
+1    71	0005  8C D3			     MOV     BX,SS
+1    72	0007  2B DA			     SUB     BX,DX
+1    73	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     74	      E3
+1    75	0011  FA			     CLI
+1    76	0012  8E D2			     MOV     SS,DX
+1    77	0014  03 E3			     ADD     SP,BX
+1    78	0016  FB			     STI
+     79	0017			     MAIN PROC FAR
+     80	0017  B8 0000s			       MOV AX,@DATA	    ;startup
+     81	001A  8E D8			       MOV DS,AX
+     82	001C  8E C0			       MOV ES,AX
+     83
+     84	001E  BA 0016r			       LEA DX,MSG	    ;display prompt message
+     85	0021  B4 09			       MOV AH,09h
+     86	0023  CD 21			       INT 21h
+     87
+     88					       ; - TO DO - Add your code here to
+     89					       ; Read input  string form Keybaord ; example : -12 / -3
+     90	0025  B4 0A			       MOV  AH,0AH
+     91	0027  BA 0000r			       MOV  DX,OFFSET Buffer
+     92	002A  CD 21			       INT 21H
+     93
+     94					       ; Validate Data
+     95	002C  BE 0002r			       LEA si, ACT_BUF
+     96	002F  BF 00DAr			       LEA di, sign1
+     97	0032  E8 00C0			       CALL readSign
+     98	0035  BF 00DBr			       LEA di, operand1
+     99	0038  E8 00CD			       CALL readValue
+    100	003B  BF 00E1r			       LEA di, operator
+    101	003E  E8 00F3			       CALL readOp
+    102	0041  BF 00E2r			       LEA di, sign2
+    103	0044  E8 00AE			       CALL readSign
+    104	0047  BF 00E3r			       LEA di, operand2
+    105	004A  E8 00BB			       CALL readValue
+    106
+    107	004D			     toOper:
+    108	004D  BE 00DBr			       MOV SI, OFFSET operand1
+    109	0050  E8 010F			       CALL ASC2HEX
+    110	0053  A1 00EAr			       MOV AX, [MULT1]
+    111	0056  A3 00DFr			       MOV [operand1_hex], AX
+    112
+    113	0059  C7 06 00EAr 0000		       MOV MULT1, 0000h
+    114
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 3
+Lab4.asm
+
+
+
+    115	005F  BE 00E3r			       MOV SI, OFFSET operand2
+    116	0062  E8 00FD			       CALL ASC2HEX
+    117	0065  A1 00EAr			       MOV AX, [MULT1]
+    118	0068  A3 00E7r			       MOV [operand2_hex], AX
+    119
+    120	006B  8B 1E 00DFr		       MOV BX, operand1_hex
+    121	006F  80 3E 00DAr 2D		       CMP sign1,'-'
+    122	0074  74 20			       JE checkNegMag
+    123	0076  80 3E 00DAr 2B		       CMP sign1,'+'
+    124	007B  74 12			       JE checkPosMag
+    125
+    126	007D			     two:
+    127	007D  8B 1E 00E7r		       MOV BX, operand2_hex
+    128	0081  80 3E 00E2r 2D		       CMP sign2,'-'
+    129	0086  74 1C			       JE twocheckNegMag
+    130	0088  80 3E 00E2r 2B		       CMP sign2,'+'
+    131	008D  74 0E			       JE twocheckPosMag
+    132
+    133	008F			     checkPosMag:
+    134	008F  80 FB 79			       CMP BL, 79h
+    135	0092  77 56			       JA fail
+    136	0094  EB E7			       JMP two
+    137	0096			     checkNegMag:
+    138	0096  80 FB 80			       CMP BL, 80h
+    139	0099  77 4F			       JA fail
+    140	009B  EB E0			       JMP two
+    141
+    142	009D			     twocheckPosMag:
+    143	009D  80 FB 79			       CMP BL, 79h
+    144	00A0  77 48			       JA fail
+    145	00A2  EB 07			       JMP continue
+    146	00A4			     twocheckNegMag:
+    147	00A4  80 FB 80			       CMP BL, 80h
+    148	00A7  77 41			       JA fail
+    149	00A9  EB 00			       JMP continue
+    150
+    151	00AB			     continue:
+    152	00AB  8A 26 00DAr		       MOV AH, sign1
+    153	00AF  A0 00E2r			       MOV AL, sign2
+    154
+    155	00B2  BE 00DFr			       LEA SI, operand1_hex
+    156	00B5  BF 00E7r			       LEA DI, operand2_hex
+    157
+    158	00B8  E9 0101			       JMP HOP
+    159
+    160	00BB			     print:
+    161					       ;Convert	result back to ASCII and output
+    162	00BB  A1 00ECr			       MOV AX,[HEX_RES]
+    163	00BE  BB 00EEr			       LEA BX,ASC_RES
+    164	00C1  E8 00C3			       CALL HEX2ASC
+    165
+    166	00C4  BA 003Br			       MOV DX, OFFSET NEWLINE
+    167	00C7  B4 09			       MOV AH,09H
+    168	00C9  CD 21			       INT 21H
+    169
+    170	00CB  BA 00AEr			       MOV DX, OFFSET RES_MSG
+    171	00CE  B4 09			       MOV AH,09H
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 4
+Lab4.asm
+
+
+
+    172	00D0  CD 21			       INT 21H
+    173
+    174	00D2  8A 16 00F5r		       MOV DL, [RES_SIGN]
+    175	00D6  B4 02			       MOV AH,02H
+    176	00D8  CD 21			       INT 21H
+    177
+    178	00DA  BA 00EEr			       MOV DX,OFFSET ASC_RES
+    179	00DD  B4 09			       MOV AH,09H
+    180	00DF  CD 21			       INT 21H
+    181
+    182	00E1  BA 003Br			       MOV DX, OFFSET NEWLINE
+    183	00E4  B4 09			       MOV AH,09H
+    184	00E6  CD 21			       INT 21H
+    185
+    186	00E8  EB 07			       JMP quit
+    187
+    188	00EA			     fail:
+    189	00EA  BA 003Er			       MOV DX, OFFSET ERROR
+    190	00ED  B4 09			       MOV AH,09H
+    191	00EF  CD 21			       INT 21H
+    192
+    193	00F1			     quit:
+    194
+    195					.EXIT
+1   196	00F1  B4 4C			     MOV     AH,4Ch
+1   197	00F3  CD 21			     INT     21h
+    198	00F5			     MAIN ENDP
+    199
+    200	00F5			     ReadSign  PROC NEAR
+    201	00F5  FC			       CLD
+    202	00F6  AC			       LODSB
+    203	00F7  3C 20			       CMP AL, 20H
+    204	00F9  74 09			       JE finish
+    205	00FB  3C 0D			       CMP AL, 0DH
+    206	00FD  74 05			       JE finish
+    207	00FF  3C 2D			       CMP AL, '-'
+    208	0101  75 02			       JNE notNeg
+    209	0103  AA			       STOSB
+    210
+    211	0104  C3		     finish:   ret
+    212
+    213	0105  4E		     notNeg:   DEC SI
+    214	0106  EB FC			       JMP finish
+    215
+    216	0108			     ENDP
+    217
+    218	0108			     ReadValue PROC NEAR
+    219
+    220	0108  FC			       CLD
+    221	0109  AC		     again:    LODSB
+    222	010A  3C 20			       CMP AL, 20H
+    223	010C  74 F6			       JE finish
+    224	010E  3C 0D			       CMP AL, 0DH
+    225	0110  74 F2			       JE finish
+    226
+    227	0112  3C 30			       CMP AL, 30H
+    228	0114  72 13			       JB failNum
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 5
+Lab4.asm
+
+
+
+    229	0116  3C 39			       CMP AL, 39H
+    230	0118  77 0F			       JA failNum
+    231
+    232	011A  81 FF 00DEr		       CMP DI,OFFSET operand1+3
+    233	011E  74 09			       JE failNum
+    234	0120  81 FF 00E6r		       CMP DI,OFFSET operand2+3
+    235	0124  74 03			       JE failNum
+    236
+    237	0126  AA			       STOSB
+    238
+    239	0127  EB E0			       JMP again
+    240
+    241	0129  BA 003Er		     failNum:  MOV DX, OFFSET ERROR
+    242	012C  B4 09			       MOV AH,09H
+    243	012E  CD 21			       INT 21H
+    244
+    245					.EXIT
+1   246	0130  B4 4C			     MOV     AH,4Ch
+1   247	0132  CD 21			     INT     21h
+    248
+    249	0134			     ENDP
+    250
+    251	0134			     ReadOp PROC NEAR
+    252	0134  FC			       CLD
+    253	0135  AC		     opAgain:  LODSB
+    254	0136  3C 20			       CMP AL, 20H
+    255	0138  74 CA			       JE finish
+    256	013A  3C 0D			       CMP AL, 0DH
+    257	013C  74 C6			       JE finish
+    258
+    259	013E  3C 2A			       CMP AL, 2AH
+    260	0140  74 12			       JE close
+    261
+    262	0142  3C 2B			       CMP AL, 2BH
+    263	0144  74 0E			       JE close
+    264
+    265	0146  3C 2D			       CMP AL, 2DH
+    266	0148  74 0A			       JE close
+    267
+    268	014A  3C 2F			       CMP AL, 2FH
+    269	014C  74 06			       JE close
+    270
+    271	014E  3C 25			       CMP AL, 25H
+    272	0150  74 02			       JE close
+    273
+    274	0152  EB 03			       JMP failOp
+    275
+    276	0154  AA		     close:    STOSB
+    277
+    278	0155  EB DE			       JMP opAgain
+    279
+    280	0157  BA 003Er		     failOp:   MOV DX, OFFSET ERROR
+    281	015A  B4 09			       MOV AH,09H
+    282	015C  CD 21			       INT 21H
+    283					.EXIT
+1   284	015E  B4 4C			     MOV     AH,4Ch
+1   285	0160  CD 21			     INT     21h
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 6
+Lab4.asm
+
+
+
+    286
+    287	0162			     ENDP
+    288
+    289	0162			     ASC2HEX PROC NEAR
+    290
+    291	0162  50			    PUSH AX
+    292	0163  52			    PUSH DX
+    293	0164  2B FF			    SUB	     DI,DI	     ;CLEAR DI FOR THE BINARY(HEX) RESULT
+    294	0166  2B C9			    SUB	     CX,CX	     ;clear register CX
+    295	0168  8A 0C		     AL1:   MOV	     CL,[SI]	     ; move first ASCII	vlaue
+    296	016A  46			    INC	     SI
+    297	016B  80 F9 24			    CMP	     CL,24H	     ; CHECK IF	EMPTY
+    298	016E  74 11			    JE	     FINISH1
+    299	0170  80 E9 30			    SUB	     CL,30H	     ; FROM ASCII TO BCD /HEX/Binary
+    300	0173  B8 000A			    MOV	     AX,10	     ;
+    301	0176  F7 26 00EAr		    MUL	     MULT1	     ; Place holder FOR	THE RESULT , initially =0
+    302	017A  03 C1			    ADD	     AX,CX
+    303	017C  A3 00EAr			    MOV	     MULT1,AX
+    304	017F  EB E7			    JMP	     AL1
+    305
+    306	0181			     FINISH1  :
+    307	0181  5A			     POP DX
+    308	0182  58			     POP AX
+    309	0183  C3			     RET
+    310
+    311	0184			     ASC2HEX ENDP
+    312
+    313	0184			     RET_HOP PROC NEAR
+    314
+    315	0184  E9 FF34			     JMP print
+    316
+    317	0187			     RET_HOP ENDP
+    318
+    319	0187			     HEX2ASC PROC NEAR
+    320
+    321	0187  B9 0000			     MOV CX,0
+    322	018A  50 55 8B EC C7 46	02+	     PUSH 10
+    323	      000A 5D
+    324	0194  B9 000A			     MOV CX,10
+    325	0197  BA 0000		     L1:     MOV DX,0
+    326	019A  F7 F1			     DIV CX
+    327	019C  52			     PUSH DX
+    328	019D  3D 0000			     CMP AX,0
+    329	01A0  75 F5			     JNZ L1
+    330	01A2  5A		     L2:     POP DX
+    331	01A3  83 FA 0A			     CMP DX, 10
+    332	01A6  74 10			     JE	L4
+    333	01A8  80 C2 30			     ADD DL, 30H
+    334	01AB  80 FA 39			     CMP DL, 39H
+    335	01AE  76 03			     JBE L3
+    336	01B0  80 C2 07			     ADD DL, 7
+    337	01B3  88 17		     L3:     MOV [BX], DL
+    338	01B5  43			     INC BX
+    339	01B6  EB EA			     JMP L2
+    340	01B8  C6 07 24		     L4:     MOV BYTE PTR[BX],'$'
+    341	01BB  C3			     ret
+    342
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 7
+Lab4.asm
+
+
+
+    343	01BC			     HEX2ASC ENDP
+    344
+    345	01BC			     HOP PROC NEAR
+    346
+    347	01BC  80 3E 00E1r 2B		       CMP operator,'+'
+    348	01C1  74 1D			       JE DO_ADD
+    349	01C3  80 3E 00E1r 2D		       CMP operator,'-'
+    350	01C8  74 52			       JE DO_SUB
+    351	01CA  80 3E 00E1r 2A		       CMP operator,'*'
+    352	01CF  74 44			       JE HOP_MUL
+    353	01D1  80 3E 00E1r 2F		       CMP operator,'/'
+    354	01D6  74 3F			       JE HOP_DIV
+    355	01D8  80 3E 00E1r 25		       CMP operator,'%'
+    356	01DD  74 3A			       JE HOP_MOD
+    357	01DF  C3			       ret
+    358
+    359	01E0			     HOP ENDP
+    360
+    361	01E0			     DO_ADD PROC NEAR
+    362
+    363	01E0  3A E0				 CMP AH,AL
+    364	01E2  74 20				 JE addition
+    365
+    366	01E4  8A 3C				 MOV BH,[SI]
+    367	01E6  8A 1D				 MOV BL,[DI]
+    368	01E8  3A FB				 CMP BH,BL
+    369	01EA  72 02				 JB bigDI
+    370
+    371	01EC  EB 0B				 JMP bigSI
+    372
+    373	01EE  8A E0		     bigDI:	 MOV AH, AL
+    374	01F0  BB 0000				 MOV BX, 0000h
+    375	01F3  03 1D				 ADD BX, [DI]
+    376	01F5  2B 1C				 SUB BX, [SI]
+    377	01F7  EB 12				 JMP add_fin
+    378
+    379	01F9  8A C4		     bigSI:	 MOV AL, AH
+    380	01FB  BB 0000				 MOV BX, 0000h
+    381	01FE  03 1C				 ADD BX, [SI]
+    382	0200  2B 1D				 SUB BX, [DI]
+    383	0202  EB 07				 JMP add_fin
+    384
+    385	0204  BB 0000		     addition:	 MOV BX, 0000h
+    386	0207  03 1C				 ADD BX,[SI]
+    387	0209  03 1D				 ADD BX,[DI]
+    388
+    389	020B  89 1E 00ECr	     add_fin:	 MOV [HEX_RES],	BX
+    390	020F  A2 00F5r				 MOV RES_SIGN, AL
+    391	0212  E9 FF6F				 JMP RET_HOP
+    392
+    393	0215			     DO_ADD ENDP
+    394
+    395	0215			     HOP_MUL PROC NEAR
+    396
+    397	0215  EB 48			     JMP DO_MUL
+    398
+    399	0217			     HOP_MUL ENDP
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 8
+Lab4.asm
+
+
+
+    400
+    401	0217			     HOP_DIV PROC NEAR
+    402
+    403	0217  EB 63			     JMP DO_DIV
+    404
+    405	0219			     HOP_DIV ENDP
+    406
+    407	0219			     HOP_MOD PROC NEAR
+    408
+    409	0219  E9 008D			     JMP DO_MOD
+    410
+    411	021C			     HOP_MOD ENDP
+    412
+    413	021C			     DO_SUB PROC NEAR
+    414
+    415	021C  3A E0				 CMP AH,AL
+    416	021E  75 2D				 JNE subtraction
+    417
+    418	0220  8A 3C				 MOV BH,[SI]
+    419	0222  8A 1D				 MOV BL,[DI]
+    420	0224  3A FB				 CMP BH,BL
+    421	0226  72 02				 JB dbigDI
+    422
+    423	0228  EB 18				 JMP dbigSI
+    424
+    425	022A  8A E0		     dbigDI:	 MOV AH, AL
+    426	022C  BB 0000				 MOV BX, 0000h
+    427	022F  03 1D				 ADD BX, [DI]
+    428	0231  2B 1C				 SUB BX, [SI]
+    429
+    430	0233  80 FC 2B				 CMP AH, '+'
+    431	0236  74 02				 JE sMakeNeg
+    432
+    433	0238  EB 04				 JMP sMakePos
+    434
+    435	023A  B4 2D		     sMakeNeg:	 MOV AH, '-'
+    436	023C  EB 16				 JMP dadd_fin
+    437
+    438	023E  B4 2B		     sMakePos:	 MOV AH, '+'
+    439	0240  EB 12				 JMP dadd_fin
+    440
+    441	0242  8A C4		     dbigSI:	 MOV AL, AH
+    442	0244  BB 0000				 MOV BX, 0000h
+    443	0247  03 1C				 ADD BX, [SI]
+    444	0249  2B 1D				 SUB BX, [DI]
+    445	024B  EB 07				 JMP dadd_fin
+    446
+    447	024D  BB 0000		     subtraction:MOV BX, 0000h
+    448	0250  03 1C				 ADD BX,[SI]
+    449	0252  03 1D				 ADD BX,[DI]
+    450
+    451	0254  89 1E 00ECr	     dadd_fin:	 MOV [HEX_RES],	BX
+    452	0258  88 26 00F5r			 MOV RES_SIGN, AH
+    453	025C  E9 FF25				 JMP RET_HOP
+    454
+    455	025F			     DO_SUB ENDP
+    456
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 9
+Lab4.asm
+
+
+
+    457	025F			     DO_MUL PROC NEAR
+    458
+    459	025F  50			    PUSH AX
+    460
+    461	0260  BA 0000			    MOV	DX, 0000h
+    462
+    463	0263  8B 04			    MOV	AX, [SI]
+    464	0265  8B 1D			    MOV	BX, [DI]
+    465	0267  F7 EB			    IMUL BX
+    466
+    467	0269  A3 00ECr			    MOV	[HEX_RES], AX
+    468	026C  58			    POP	AX
+    469
+    470	026D  3A E0			    CMP	AH, AL
+    471	026F  75 03			    JNE	mNeg
+    472
+    473	0271  E9 FF10			    JMP	RET_HOP
+    474
+    475	0274  C6 06 00F5r 2D	     mNeg:  MOV	RES_SIGN,'-'
+    476	0279  E9 FF08			    JMP	RET_HOP
+    477
+    478	027C			     DO_MUL ENDP
+    479
+    480	027C			     DO_DIV PROC NEAR
+    481
+    482	027C  50			    PUSH AX
+    483	027D  BA 0000			    MOV	DX, 0000h
+    484
+    485	0280  83 3D 00			    CMP	WORD PTR [DI], 0000h
+    486	0283  74 19			    JE dZero
+    487
+    488	0285  8B 04			    MOV	AX, [SI]
+    489	0287  8B 1D			    MOV	BX, [DI]
+    490	0289  F7 FB			    IDIV BX
+    491
+    492	028B  A3 00ECr			    MOV	[HEX_RES], AX
+    493	028E  58			    POP	AX
+    494
+    495	028F  3A E0			    CMP	AH, AL
+    496	0291  75 03			    JNE	dNeg
+    497
+    498	0293  E9 FEEE			    JMP	RET_HOP
+    499
+    500	0296  C6 06 00F5r 2D	     dNeg:  MOV	RES_SIGN,'-'
+    501	029B  E9 FEE6			    JMP	RET_HOP
+    502
+    503	029E  BA 00C0r		     dZero: LEA	DX,DIV_ZERO
+    504	02A1  B4 09			    MOV	AH,09h
+    505	02A3  CD 21			    INT	21h
+    506
+    507					    .EXIT
+1   508	02A5  B4 4C			     MOV     AH,4Ch
+1   509	02A7  CD 21			     INT     21h
+    510
+    511	02A9			     DO_DIV ENDP
+    512
+    513	02A9			     DO_MOD PROC NEAR
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 10
+Lab4.asm
+
+
+
+    514
+    515	02A9  50			    PUSH AX
+    516	02AA  BA 0000			    MOV	DX, 0000h
+    517
+    518	02AD  83 3D 00			    CMP	WORD PTR [DI], 0000h
+    519	02B0  74 1A			    JE oZero
+    520
+    521	02B2  8B 04			    MOV	AX, [SI]
+    522	02B4  8B 1D			    MOV	BX, [DI]
+    523	02B6  F7 FB			    IDIV BX
+    524
+    525	02B8  89 16 00ECr		    MOV	[HEX_RES], DX
+    526	02BC  58			    POP	AX
+    527
+    528	02BD  3A E0			    CMP	AH, AL
+    529	02BF  75 03			    JNE	oNeg
+    530
+    531	02C1  E9 FEC0			    JMP	RET_HOP
+    532
+    533	02C4  C6 06 00F5r 2D	     oNeg:  MOV	RES_SIGN,'-'
+    534	02C9  E9 FEB8			    JMP	RET_HOP
+    535
+    536	02CC  BA 00C0r		     oZero: LEA	DX,DIV_ZERO
+    537	02CF  B4 09			    MOV	AH,09h
+    538	02D1  CD 21			    INT	21h
+    539
+    540					    .EXIT
+1   541	02D3  B4 4C			     MOV     AH,4Ch
+1   542	02D5  CD 21			     INT     21h
+    543	02D7			     DO_MOD ENDP
+    544
+    545
+    546				     END
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 11
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "05/02/17"
+??FILENAME			  Text	 "Lab4	  "
+??TIME				  Text	 "11:21:14"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 LAB4_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 LAB4_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 LAB4
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 LAB4_TEXT:0000
+@WORDSIZE			  Text	 2
+ACT_BUF				  Byte	 DGROUP:0002
+ADDITION			  Near	 LAB4_TEXT:0204
+ADD_FIN				  Near	 LAB4_TEXT:020B
+AGAIN				  Near	 LAB4_TEXT:0109
+AL1				  Near	 LAB4_TEXT:0168
+ASC2HEX				  Near	 LAB4_TEXT:0162
+ASC_RES				  Byte	 DGROUP:00EE
+BIGDI				  Near	 LAB4_TEXT:01EE
+BIGSI				  Near	 LAB4_TEXT:01F9
+BUFFER				  Byte	 DGROUP:0000
+CHECKNEGMAG			  Near	 LAB4_TEXT:0096
+CHECKPOSMAG			  Near	 LAB4_TEXT:008F
+CLOSE				  Near	 LAB4_TEXT:0154
+CONTINUE			  Near	 LAB4_TEXT:00AB
+DADD_FIN			  Near	 LAB4_TEXT:0254
+DBIGDI				  Near	 LAB4_TEXT:022A
+DBIGSI				  Near	 LAB4_TEXT:0242
+DIV_ZERO			  Byte	 DGROUP:00C0
+DNEG				  Near	 LAB4_TEXT:0296
+DO_ADD				  Near	 LAB4_TEXT:01E0
+DO_DIV				  Near	 LAB4_TEXT:027C
+DO_MOD				  Near	 LAB4_TEXT:02A9
+DO_MUL				  Near	 LAB4_TEXT:025F
+DO_SUB				  Near	 LAB4_TEXT:021C
+DZERO				  Near	 LAB4_TEXT:029E
+ERROR				  Byte	 DGROUP:003E
+FAIL				  Near	 LAB4_TEXT:00EA
+FAILNUM				  Near	 LAB4_TEXT:0129
+FAILOP				  Near	 LAB4_TEXT:0157
+FINISH				  Near	 LAB4_TEXT:0104
+FINISH1				  Near	 LAB4_TEXT:0181
+HEX2ASC				  Near	 LAB4_TEXT:0187
+HEX_RES				  Word	 DGROUP:00EC
+HOP				  Near	 LAB4_TEXT:01BC
+HOP_DIV				  Near	 LAB4_TEXT:0217
+HOP_MOD				  Near	 LAB4_TEXT:0219
+HOP_MUL				  Near	 LAB4_TEXT:0215
+Turbo Assembler	 Version 4.1	    05/02/17 11:21:14	    Page 12
+Symbol Table
+
+
+
+L1				  Near	 LAB4_TEXT:0197
+L2				  Near	 LAB4_TEXT:01A2
+L3				  Near	 LAB4_TEXT:01B3
+L4				  Near	 LAB4_TEXT:01B8
+MAIN				  Far	 LAB4_TEXT:0017
+MNEG				  Near	 LAB4_TEXT:0274
+MSG				  Byte	 DGROUP:0016
+MULT1				  Word	 DGROUP:00EA
+NEWLINE				  Byte	 DGROUP:003B
+NOTNEG				  Near	 LAB4_TEXT:0105
+NUM				  Byte	 DGROUP:0001
+ONEG				  Near	 LAB4_TEXT:02C4
+OPAGAIN				  Near	 LAB4_TEXT:0135
+OPERAND1			  Byte	 DGROUP:00DB
+OPERAND1_HEX			  Word	 DGROUP:00DF
+OPERAND2			  Byte	 DGROUP:00E3
+OPERAND2_HEX			  Word	 DGROUP:00E7
+OPERATOR			  Byte	 DGROUP:00E1
+OZERO				  Near	 LAB4_TEXT:02CC
+PRINT				  Near	 LAB4_TEXT:00BB
+QUIT				  Near	 LAB4_TEXT:00F1
+READOP				  Near	 LAB4_TEXT:0134
+READSIGN			  Near	 LAB4_TEXT:00F5
+READVALUE			  Near	 LAB4_TEXT:0108
+RESULTS				  Byte	 DGROUP:00E9
+RES_MSG				  Byte	 DGROUP:00AE
+RES_SIGN			  Byte	 DGROUP:00F5
+RET_HOP				  Near	 LAB4_TEXT:0184
+SIGN1				  Byte	 DGROUP:00DA
+SIGN2				  Byte	 DGROUP:00E2
+SMAKENEG			  Near	 LAB4_TEXT:023A
+SMAKEPOS			  Near	 LAB4_TEXT:023E
+SUBTRACTION			  Near	 LAB4_TEXT:024D
+TOOPER				  Near	 LAB4_TEXT:004D
+TWO				  Near	 LAB4_TEXT:007D
+TWOCHECKNEGMAG			  Near	 LAB4_TEXT:00A4
+TWOCHECKPOSMAG			  Near	 LAB4_TEXT:009D
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0400 Para	  Stack	  STACK
+  _DATA				  16  00F6 Word	  Public  DATA
+LAB4_TEXT			  16  02D7 Word	  Public  CODE
+

@@ -1,0 +1,440 @@
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 1
+Lab4.asm
+
+
+
+      1				     ;LAB 4 PROGRAM
+      2
+      3				     ;FILENAME:	lab4.asm
+      4
+      5				     ;FILE TYPE: EXE
+      6
+      7	0000			     .MODEL MEDIUM
+      8
+      9	0000			     .STACK 1024
+     10
+     11	0000			     .DATA
+     12
+     13	0000  14			  Buffer   DB 20
+     14
+     15	0001  ??			  NUM	   DB ?
+     16
+     17	0002  14*(24)			  ACT_BUF  DB 20 DUP('$')
+     18
+     19	0016  0D 0A 45 6E 74 65	72+	  MSG	   DB 0DH,0AH,'Enter an	algebraic command line:',0DH,0AH,'$'
+     20	      20 61 6E 20 61 6C	67+
+     21	      65 62 72 61 69 63	20+
+     22	      63 6F 6D 6D 61 6E	64+
+     23	      20 6C 69 6E 65 3A	0D+
+     24	      0A 24
+     25
+     26	003B  0D 0A 24			  NEWLINE  DB 0DH,0AH,'$'
+     27
+     28	003E  45 72 72 6F 72 2C	20+	  ERROR	   DB 'Error, invalid input',0DH,0AH,'Input format: Operand1 Operator Operand2',0DH,+
+     29	      69 6E 76 61 6C 69	64+  0AH,'Operand: decimal numbers',0DH,0AH,'Operator: + - * / %$',0DH,0AH
+     30	      20 69 6E 70 75 74	0D+
+     31	      0A 49 6E 70 75 74	20+
+     32	      66 6F 72 6D 61 74	3A+
+     33	      20 4F 70 65 72 61	6E+
+     34	      64 31 20 4F 70 65	72+
+     35	      61 74 6F 72 20 4F	70+
+     36	      65 72 61 6E 64 32	0D+
+     37	      0A 4F 70 65 72 61	6E+
+     38	      64 3A 20 64 65 63	69+
+     39	      6D 61 6C 20 6E 75	6D+
+     40	      62 65 72 73 0D 0A	4F+
+     41	      70 65 72 61 74 6F	72+
+     42	      3A 20 2B 20 2D 20	2A+
+     43	      20 2F 20 25 24 0D	0A
+     44
+     45	00AE  41 67 61 69 6E 3F	20+	  AGAIN	   DB 'Again? press y for yes, any other key to	exit:$'
+     46	      70 72 65 73 73 20	79+
+     47	      20 66 6F 72 20 79	65+
+     48	      73 2C 20 61 6E 79	20+
+     49	      6F 74 68 65 72 20	6B+
+     50	      65 79 20 74 6F 20	65+
+     51	      78 69 74 3A 24
+     52
+     53	00DD  4F 70 65 72 61 6E	64+	  OPERAND1 DB 'Operand1:$'
+     54	      31 3A 24
+     55
+     56	00E7  4F 70 65 72 61 6E	64+	  OPERAND2 DB 'Operand2:$'
+     57	      32 3A 24
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 2
+Lab4.asm
+
+
+
+     58
+     59	00F1  4F 70 65 72 61 74	6F+	  OPERATOR DB 'Operator:$'
+     60	      72 3A 24
+     61
+     62	00FB  52 65 73 75 6C 74	3A+	  RESULTS  DB 'Result:$'
+     63	      24
+     64
+     65	0103  04*(24)			  N1_A	DB 4 DUP ('$')
+     66
+     67	0107  04*(24)			  N2_A	 DB 4 DUP ('$')
+     68
+     69	010B  00			  N1_H	    DB 0
+     70
+     71	010C  00			  N2_H	    DB 0
+     72
+     73	010D  ??			  OPT	    DB ?
+     74
+     75	010E  0000			  Result_H  DW 0
+     76
+     77	0110  14*(24)			  Result_A  DB 20 DUP ('$')
+     78
+     79	0124  00			  choice    DB 0
+     80
+     81
+     82	0125			     .CODE
+     83
+     84					  .STARTUP
+1    85	0000			     @Startup:
+1    86	0000  BA 0000s			     MOV     DX,@data
+1    87	0003  8E DA			     MOV     DS,DX
+1    88	0005  8C D3			     MOV     BX,SS
+1    89	0007  2B DA			     SUB     BX,DX
+1    90	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     91	      E3
+1    92	0011  FA			     CLI
+1    93	0012  8E D2			     MOV     SS,DX
+1    94	0014  03 E3			     ADD     SP,BX
+1    95	0016  FB			     STI
+     96
+     97	0017			     MAIN PROC FAR
+     98
+     99	0017  B8 0000s		     START:    MOV AX,@DATA	    ;startup
+    100	001A  8E D8			       MOV DS,AX
+    101	001C  8E C0			       MOV ES,AX
+    102
+    103	001E  BA 0016r			       LEA DX,MSG	    ;display prompt message
+    104	0021  B4 09			       MOV AH,09h
+    105	0023  CD 21			       INT 21h
+    106
+    107
+    108					       ;Enter String
+    109	0025  B4 0A			       MOV  AH,0AH
+    110	0027  BA 0000r			       MOV  DX,OFFSET Buffer
+    111	002A  CD 21			       INT 21H
+    112
+    113					       ;Display	 new line
+    114	002C  BA 003Br			       MOV DX, OFFSET NEWLINE
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 3
+Lab4.asm
+
+
+
+    115	002F  B4 09			       MOV AH,09H
+    116	0031  CD 21			       INT 21H
+    117
+    118					       ;Display	the entered string
+    119	0033  BA 0002r			       MOV DX, OFFSET ACT_BUF
+    120	0036  B4 09			       MOV AH, 09H
+    121	0038  CD 21			       INT 21H
+    122
+    123					       ; Display  new line
+    124	003A  BA 003Br			       MOV DX, OFFSET NEWLINE
+    125	003D  B4 09			       MOV AH,09H
+    126	003F  CD 21			       INT 21H
+    127
+    128	0041  BF 0103r			       LEA DI, N1_A
+    129	0044  BE 0002r			       LEA SI, Act_Buf
+    130
+    131	0047  B9 0000			       MOV CX, 0000H
+    132	004A  8A 0E 0001r		       MOV CL, NUM
+    133
+    134	004E  FC		     T:	       CLD
+    135	004F  AC			       LODSB
+    136	0050  3C 20			       CMP AL, 20H
+    137					       ;JNE E			       ;error check jump
+    138	0052  74 09			       JE T2
+    139	0054  3C 0D			       CMP AL, 0DH
+    140					       ;JNE E			       ;error check jump
+    141	0056  74 14			       JE T3
+    142	0058  88 05			       MOV [DI], AL
+    143	005A  47			       INC DI
+    144	005B  E2 F1			       LOOP T
+    145
+    146	005D  AC		     T2:       LODSB
+    147	005E  A2 010Dr			       MOV OPT,	AL
+    148	0061  83 C6 01			       ADD SI, 1
+    149	0064  BF 0107r			       LEA DI, N2_A
+    150	0067  83 E9 01			       SUB CX, 1
+    151	006A  E2 E2			       LOOP T
+    152
+    153	006C  BE 0103r		     T3:       MOV SI, OFFSET N1_A	   ;ASCII to Hex conversion
+    154	006F  E8 00F0			       CALL A2H
+    155	0072  88 1E 010Br		       MOV N1_H, BL
+    156
+    157
+    158	0076  BE 0107r			       MOV SI, OFFSET N2_A
+    159	0079  E8 00E6			       CALL A2H
+    160	007C  88 1E 010Cr		       MOV N2_H, BL
+    161	0080  B8 0000			       MOV AX, 0000H
+    162	0083  A0 010Br			       MOV AL, N1_H
+    163	0086  BB 0000			       MOV BX, 0000H
+    164	0089  8A 1E 010Cr		       MOV BL, N2_H
+    165
+    166	008D  EB 0A			       JMP OPERATE
+    167
+    168	008F  BA 003Er		     E:	       MOV DX, OFFSET ERROR
+    169	0092  B4 09			       MOV AH,09H
+    170	0094  CD 21			       INT 21H
+    171	0096  E9 00AC			       JMP OPTION
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 4
+Lab4.asm
+
+
+
+    172
+    173	0099			     OPERATE:  ;COMPUTATIONS
+    174	0099  80 3E 010Dr 2B		       CMP OPT,	'+'
+    175	009E  74 1C			       JE PLUS
+    176
+    177	00A0  80 3E 010Dr 2D		       CMP OPT,	'-'
+    178	00A5  74 1C			       JE MINUS
+    179
+    180	00A7  80 3E 010Dr 2A		       CMP OPT,	'*'
+    181	00AC  74 1C			       JE MULT
+    182
+    183	00AE  80 3E 010Dr 2F		       CMP OPT,	'/'
+    184	00B3  74 1C			       JE QUOTIENT
+    185
+    186	00B5  80 3E 010Dr 25		       CMP OPT,	'%'
+    187	00BA  74 1F			       JE MODULUS
+    188
+    189	00BC  03 C3		     PLUS:     ADD AX, BX
+    190	00BE  A3 010Er			       MOV Result_H, AX
+    191	00C1  EB 26			       JMP HEX
+    192
+    193	00C3  2B C3		     MINUS:    SUB AX, BX
+    194	00C5  A3 010Er			       MOV Result_H, AX
+    195	00C8  EB 1F			       JMP HEX
+    196
+    197	00CA  F7 EB		     MULT:     IMUL BX
+    198	00CC  A3 010Er			       MOV Result_H,AX
+    199	00CF  EB 18			       JMP HEX
+    200
+    201	00D1  BA 0000		     QUOTIENT: MOV DX, 0000H
+    202	00D4  F7 FB			       IDIV BX
+    203	00D6  A3 010Er			       MOV Result_H, AX
+    204	00D9  EB 0E			       JMP HEX
+    205
+    206	00DB  BA 0000		     MODULUS:  MOV DX, 0000H
+    207	00DE  F7 FB			       IDIV BX
+    208	00E0  89 16 010Er		       MOV Result_H, DX
+    209	00E4  EB 03			       JMP HEX
+    210
+    211	00E6  E9 FF2E		     START1:   JMP START
+    212
+    213	00E9  BE 010Er		     HEX:      MOV SI, OFFSET Result_H		    ;call hex 2	ascii proc
+    214	00EC  E8 008C			       CALL H2A
+    215
+    216	00EF  BA 003Br			       MOV DX, OFFSET NEWLINE
+    217	00F2  B4 09			       MOV AH,09H
+    218	00F4  CD 21			       INT 21H
+    219
+    220	00F6  BA 00DDr			       MOV DX, OFFSET OPERAND1
+    221	00F9  B4 09			       MOV AH,09H
+    222	00FB  CD 21			       INT 21H
+    223
+    224	00FD  BA 0103r			       MOV DX, OFFSET N1_A
+    225	0100  B4 09			       MOV AH, 09H
+    226	0102  CD 21			       INT 21H
+    227
+    228	0104  BA 003Br			       MOV DX, OFFSET NEWLINE
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 5
+Lab4.asm
+
+
+
+    229	0107  B4 09			       MOV AH,09H
+    230	0109  CD 21			       INT 21H
+    231
+    232	010B  BA 00E7r			       MOV DX, OFFSET OPERAND2
+    233	010E  B4 09			       MOV AH,09H
+    234	0110  CD 21			       INT 21H
+    235
+    236	0112  BA 0107r			       MOV DX, OFFSET N2_A
+    237	0115  B4 09			       MOV AH, 09H
+    238	0117  CD 21			       INT 21H
+    239
+    240	0119  BA 003Br			       MOV DX, OFFSET NEWLINE
+    241	011C  B4 09			       MOV AH,09H
+    242	011E  CD 21			       INT 21H
+    243
+    244	0120  BA 00F1r			       MOV DX, OFFSET OPERATOR
+    245	0123  B4 09			       MOV AH,09H
+    246	0125  CD 21			       INT 21H
+    247
+    248	0127  8A 16 010Dr		       MOV DL, OPT
+    249	012B  B4 02			       MOV AH, 02H
+    250	012D  CD 21			       INT 21H
+    251
+    252	012F  BA 00FBr			       MOV DX, OFFSET RESULTS
+    253	0132  B4 09			       MOV AH,09H
+    254	0134  CD 21			       INT 21H
+    255
+    256	0136  BA 0110r			       MOV DX, OFFSET Result_A
+    257	0139  B4 09			       MOV AH,09H
+    258	013B  CD 21			       INT 21H
+    259
+    260	013D  8A 16 010Dr		       MOV DL, OPT
+    261	0141  B4 02			       MOV AH, 02H
+    262	0143  CD 21			       INT 21H
+    263
+    264	0145  BA 003Br		     OPTION:   MOV DX, OFFSET NEWLINE
+    265	0148  B4 09			       MOV AH,09H
+    266	014A  CD 21			       INT 21H
+    267
+    268	014C  BA 00AEr			       MOV DX, OFFSET AGAIN
+    269	014F  B4 09			       MOV AH,09H
+    270	0151  CD 21			       INT 21H
+    271
+    272	0153  B4 01			       MOV AH, 1
+    273	0155  CD 21			       INT 21H
+    274	0157  A2 0124r			       MOV choice, AL
+    275
+    276	015A  3C 79			       CMP AL, 'y'
+    277	015C  74 88			       JE  START1
+    278
+    279
+    280					.EXIT
+1   281	015E  B4 4C			     MOV     AH,4Ch
+1   282	0160  CD 21			     INT     21h
+    283
+    284	0162			     MAIN ENDP
+    285
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 6
+Lab4.asm
+
+
+
+    286	0162			     A2H PROC NEAR
+    287	0162  B3 00			       MOV BL, 00H
+    288	0164  8A 0C		     BEGIN:    MOV CL, [SI]
+    289	0166  80 F9 24			       CMP CL, '$'
+    290	0169  74 0F			       JE  exit
+    291	016B  80 E9 30			       SUB CL, 30H
+    292	016E  B8 000A			       MOV AX, 10
+    293	0171  F7 E3			       MUL BX
+    294	0173  03 C1			       ADD AX, CX
+    295	0175  8B D8			       MOV BX, AX
+    296	0177  46			       INC SI
+    297	0178  EB EA			       JMP BEGIN
+    298	017A			     exit:
+    299	017A  C3			 RET
+    300	017B			     A2H ENDP
+    301
+    302	017B			     H2A PROC NEAR
+    303	017B  BB 0110r				LEA BX,	Result_A
+    304	017E  B9 000A				Mov CX,	10
+    305	0181  51				Push CX
+    306	0182  A1 010Er				Mov AX,	Result_H
+    307
+    308	0185  BA 0000		     L1:	Mov DX,	0      ;Diving ASCII Number
+    309	0188  F7 F1				DIV CX
+    310	018A  52				PUSH DX
+    311	018B  3D 0000				CMP AX,	0
+    312	018E  75 F5				JNZ L1
+    313
+    314	0190  5A		     L2:	POP DX
+    315	0191  3B D1				CMP DX,	CX
+    316	0193  74 08				JE L4
+    317	0195  80 C2 30				ADD DL,	30H
+    318
+    319	0198  88 17		     L3:	MOV [BX], DL
+    320	019A  43				INC BX
+    321	019B  EB F3				JMP L2
+    322
+    323	019D  C6 07 24		     L4:	MOV byte ptr[BX], '$'
+    324
+    325
+    326	01A0  C3		     RET
+    327	01A1			     H2A ENDP
+    328
+    329
+    330				     END
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 7
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "04/04/17"
+??FILENAME			  Text	 "Lab4	  "
+??TIME				  Text	 "17:46:55"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 LAB4_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 LAB4_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 LAB4
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 LAB4_TEXT:0000
+@WORDSIZE			  Text	 2
+A2H				  Near	 LAB4_TEXT:0162
+ACT_BUF				  Byte	 DGROUP:0002
+AGAIN				  Byte	 DGROUP:00AE
+BEGIN				  Near	 LAB4_TEXT:0164
+BUFFER				  Byte	 DGROUP:0000
+CHOICE				  Byte	 DGROUP:0124
+E				  Near	 LAB4_TEXT:008F
+ERROR				  Byte	 DGROUP:003E
+EXIT				  Near	 LAB4_TEXT:017A
+H2A				  Near	 LAB4_TEXT:017B
+HEX				  Near	 LAB4_TEXT:00E9
+L1				  Near	 LAB4_TEXT:0185
+L2				  Near	 LAB4_TEXT:0190
+L3				  Near	 LAB4_TEXT:0198
+L4				  Near	 LAB4_TEXT:019D
+MAIN				  Far	 LAB4_TEXT:0017
+MINUS				  Near	 LAB4_TEXT:00C3
+MODULUS				  Near	 LAB4_TEXT:00DB
+MSG				  Byte	 DGROUP:0016
+MULT				  Near	 LAB4_TEXT:00CA
+N1_A				  Byte	 DGROUP:0103
+N1_H				  Byte	 DGROUP:010B
+N2_A				  Byte	 DGROUP:0107
+N2_H				  Byte	 DGROUP:010C
+NEWLINE				  Byte	 DGROUP:003B
+NUM				  Byte	 DGROUP:0001
+OPERAND1			  Byte	 DGROUP:00DD
+OPERAND2			  Byte	 DGROUP:00E7
+OPERATE				  Near	 LAB4_TEXT:0099
+OPERATOR			  Byte	 DGROUP:00F1
+OPT				  Byte	 DGROUP:010D
+OPTION				  Near	 LAB4_TEXT:0145
+PLUS				  Near	 LAB4_TEXT:00BC
+QUOTIENT			  Near	 LAB4_TEXT:00D1
+RESULTS				  Byte	 DGROUP:00FB
+RESULT_A			  Byte	 DGROUP:0110
+RESULT_H			  Word	 DGROUP:010E
+Turbo Assembler	 Version 4.1	    04/04/17 17:46:55	    Page 8
+Symbol Table
+
+
+
+START				  Near	 LAB4_TEXT:0017
+START1				  Near	 LAB4_TEXT:00E6
+T				  Near	 LAB4_TEXT:004E
+T2				  Near	 LAB4_TEXT:005D
+T3				  Near	 LAB4_TEXT:006C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0400 Para	  Stack	  STACK
+  _DATA				  16  0125 Word	  Public  DATA
+LAB4_TEXT			  16  01A1 Word	  Public  CODE
+

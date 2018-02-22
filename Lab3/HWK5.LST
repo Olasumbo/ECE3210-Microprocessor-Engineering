@@ -1,0 +1,157 @@
+Turbo Assembler	 Version 4.1	    03/12/17 21:28:38	    Page 1
+HWK5.asm
+
+
+
+      1	0000			     .MODEL  MEDIUM
+      2	0000			     .STACK  1024
+      3	0000			     .DATA
+      4
+      5	0000  42 59 54 45 41 52	45+	  Instring     DB   'BYTEAREA:$',0AH, 0DH
+      6	      41 3A 24 0A 0D
+      7	000C  0A 0D 24			  Break	       DB   0AH,0DH,'$'	 ; new line
+      8	000F  64			  Buffer       DB   100		; max number(100) of chars expected
+      9	0010  ??			  Num	       DB   ?		; returns the number of	chars typed
+     10	0011  64*(24)			  Act_Buf      DB   100	DUP ('$') ; actual buffer w/ size=?max number?
+     11	0075  0400*(24)			  byteArea     DB   1024 DUP('$')
+     12	0475  0D 0A 20 45 6E 74	65+	  MSG	       DB   0DH,0AH,' Enter Input String:',0DH,0AH,'$'
+     13	      72 20 49 6E 70 75	74+
+     14	      20 53 74 72 69 6E	67+
+     15	      3A 0D 0A 24
+     16	048E  64			  byte1	       DB   100
+     17	048F  64			  stringIN     DB   100
+     18	0490  0D 0A 24			  New_line     DB   0DH, 0AH, '$'
+     19
+     20	0493			     .code
+     21				     .startup
+1    22	0000			     @Startup:
+1    23	0000  BA 0000s			     MOV     DX,@data
+1    24	0003  8E DA			     MOV     DS,DX
+1    25	0005  8C D3			     MOV     BX,SS
+1    26	0007  2B DA			     SUB     BX,DX
+1    27	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     28	      E3
+1    29	0011  FA			     CLI
+1    30	0012  8E D2			     MOV     SS,DX
+1    31	0014  03 E3			     ADD     SP,BX
+1    32	0016  FB			     STI
+     33	0017			     MAIN PROC FAR
+     34	0017  BF 0075r			  Mov DI, offset byteArea
+     35	001A  B9 0000			  Mov cx, 00H
+     36
+     37	001D			     T1:
+     38
+     39					; Print	out MSG
+     40	001D  BA 0475r			  Mov dx, offset MSG
+     41	0020  B4 09			  Mov ah, 09H
+     42	0022  CD 21			  int 21H
+     43
+     44	0024  BA 048Fr			  Mov dx, offset stringIN
+     45	0027  B4 09			  mov ah, 09H
+     46	0029  CD 21			  int 21H
+     47
+     48					  ;Enter String
+     49	002B  B4 0A			  Mov  ah, 0AH
+     50	002D  BA 000Fr			  Mov  dx, offset Buffer
+     51	0030  CD 21			  INT  21H
+     52
+     53					  ;Comparing the input string and finding $
+     54	0032  BB 0011r			  Mov bx, offset ACT_BUF
+     55	0035  80 3F 24			  CMP byte ptr[BX], '$'
+     56	0038  74 21			  JE Done
+     57
+Turbo Assembler	 Version 4.1	    03/12/17 21:28:38	    Page 2
+HWK5.asm
+
+
+
+     58	003A  BE 0011r			  Mov si, offset ACT_BUF
+     59	003D  8A 0E 0010r		  Mov cl, Num
+     60	0041  F3> A4			  REP MOVSB
+     61
+     62	0043  C6 05 0D			  Mov byte ptr[DI], 0DH
+     63	0046  47			  INC DI
+     64	0047  C6 05 0A			  Mov byte ptr[DI], 0AH
+     65	004A  47			  INC DI
+     66
+     67					  ;Display Newline
+     68	004B  BA 0490r			  Mov dx, offset New_line
+     69	004E  B4 09			  mov ah, 09h
+     70	0050  CD 21			  int 21H
+     71
+     72	0052  BA 0075r			  Mov dx, offset byteArea
+     73	0055  B4 09			  mov ah, 09h
+     74	0057  CD 21			  int 21h
+     75	0059  EB C2			  jmp T1
+     76
+     77	005B			     Done:
+     78	005B  BA 0075r			    Mov	dx, offset byteAREA
+     79	005E  B4 09			    Mov	ah, 09h
+     80	0060  CD 21			    int	21h
+     81
+     82					    ;TODO: Display the entered string
+     83	0062  BA 000Fr			    MOV	DX, Offset Buffer
+     84	0065  B4 0A			    MOV	AH, 0AH
+     85	0067  CD 21			    INT	21H
+     86
+     87					     ;Display  "Byte Area" string
+     88					     ;MOV DX, OFFSET Instring
+     89					     ;MOV AH,09H
+     90					     ;INT 21H
+     91
+     92					     ;MOV DX, Offset Buffer
+     93					     ;MOV AH, 0AH
+     94					     ;INT 21H
+     95
+     96
+     97					    .Exit
+1    98	0069  B4 4C			     MOV     AH,4Ch
+1    99	006B  CD 21			     INT     21h
+    100	006D			     MAIN ENDP
+    101				     END
+Turbo Assembler	 Version 4.1	    03/12/17 21:28:38	    Page 3
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/12/17"
+??FILENAME			  Text	 "HWK5	  "
+??TIME				  Text	 "21:28:38"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 HWK5_TEXT
+@CODESIZE			  Text	 1
+@CPU				  Text	 0101H
+@CURSEG				  Text	 HWK5_TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 HWK5
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 4
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 HWK5_TEXT:0000
+@WORDSIZE			  Text	 2
+ACT_BUF				  Byte	 DGROUP:0011
+BREAK				  Byte	 DGROUP:000C
+BUFFER				  Byte	 DGROUP:000F
+BYTE1				  Byte	 DGROUP:048E
+BYTEAREA			  Byte	 DGROUP:0075
+DONE				  Near	 HWK5_TEXT:005B
+INSTRING			  Byte	 DGROUP:0000
+MAIN				  Far	 HWK5_TEXT:0017
+MSG				  Byte	 DGROUP:0475
+NEW_LINE			  Byte	 DGROUP:0490
+NUM				  Byte	 DGROUP:0010
+STRINGIN			  Byte	 DGROUP:048F
+T1				  Near	 HWK5_TEXT:001D
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0400 Para	  Stack	  STACK
+  _DATA				  16  0493 Word	  Public  DATA
+HWK5_TEXT			  16  006D Word	  Public  CODE
+

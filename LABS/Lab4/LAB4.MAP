@@ -1,0 +1,9 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 00044H 00045H LAB4_TEXT          CODE
+ 00050H 00106H 000B7H _DATA              DATA
+ 00110H 0050FH 00400H STACK              STACK
+
+Program entry point at 0000:0000
+

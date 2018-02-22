@@ -1,0 +1,380 @@
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 1
+lab3.asm
+
+
+
+      1	0000			     .MODEL  SMALL
+      2
+      3	0000				     .STACK  100H
+      4
+      5	0000				     .DATA
+      6
+      7	0000  45 4E 54 45 52 20	41+	     Instring	  DB  'ENTER A STRING:$',0AH, 0DH
+      8	      20 53 54 52 49 4E	47+
+      9	      3A 24 0A 0D
+     10
+     11	0012  43 61 70 69 74 61	6C+	     CapString	  DB  'Capital Letter(s):$', 0AH, 0DH
+     12	      20 4C 65 74 74 65	72+
+     13	      28 73 29 3A 24 0A	0D
+     14
+     15	0027  4C 6F 77 65 72 20	43+	     SmalString	  DB  'Lower Case Letter(s):$',	0AH, 0DH
+     16	      61 73 65 20 4C 65	74+
+     17	      74 65 72 28 73 29	3A+
+     18	      24 0A 0D
+     19
+     20	003F  4E 75 6D 62 65 72	28+	     NumString	  DB  'Number(s):$', 0AH, 0DH
+     21	      73 29 3A 24 0A 0D
+     22
+     23	004C  53 79 6D 62 6F 6C	28+	     SYString	  DB  'Symbol(s):$', 0AH, 0DH
+     24	      73 29 3A 24 0A 0D
+     25
+     26	0059  00			     CounterL	  DB   0
+     27
+     28	005A  00			     CounterC	  DB   0
+     29
+     30	005B  0000			     CounterNum	  DW   0
+     31
+     32	005D  00			     CounterSY	  DB   0
+     33
+     34	005E  0A 0D 24			     Break	  DB  0AH,0DH,'$'  ; new line
+     35
+     36	0061  64			     Buffer	  DB   100	   ; max number(100) of	chars expected
+     37
+     38	0062  ??			     Num	  DB   ?	   ; returns the number	of chars typed
+     39
+     40	0063  64*(24)			     Act_Buf	  DB   100 DUP ('$') ; actual buffer w/	size=?max number?
+     41
+     42	00C7			     .CODE
+     43
+     44				     .STARTUP
+1    45	0000			     @Startup:
+1    46	0000  BA 0000s			     MOV     DX,@data
+1    47	0003  8E DA			     MOV     DS,DX
+1    48	0005  8C D3			     MOV     BX,SS
+1    49	0007  2B DA			     SUB     BX,DX
+1    50	0009  D1 E3 D1 E3 D1 E3	D1+	     SHL     BX,4
+     51	      E3
+1    52	0011  FA			     CLI
+1    53	0012  8E D2			     MOV     SS,DX
+1    54	0014  03 E3			     ADD     SP,BX
+1    55	0016  FB			     STI
+     56
+     57	0017			     MAIN    PROC FAR
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 2
+lab3.asm
+
+
+
+     58
+     59	0017  B8 0000s			     MOV  AX,@data
+     60
+     61	001A  8E D8			     MOV  DS,AX
+     62
+     63	001C  8E C0			     MOV  ES,AX
+     64
+     65	001E  B8 0000			     MOV  AX,0000H
+     66
+     67	0021  B9 0000			     MOV  CX,0000H
+     68
+     69					     ;MOV  CL, Num
+     70
+     71					     ;Display "ENTER A STRING"
+     72
+     73	0024  BA 0000r			     MOV DX, OFFSET Instring
+     74
+     75	0027  B4 09			     MOV AH,09H
+     76
+     77	0029  CD 21			     INT 21H
+     78
+     79					     ;Enter String
+     80
+     81	002B  B4 0A			     MOV  AH,0AH
+     82
+     83	002D  BA 0061r			     MOV  DX,OFFSET Buffer
+     84
+     85	0030  CD 21			     INT 21H
+     86
+     87	0032  8A 0E 0062r		     MOV  CL, Num
+     88
+     89					     ; Display	new line
+     90
+     91	0036  BA 005Er			     MOV DX, OFFSET Break
+     92
+     93	0039  B4 09			     MOV AH,09H
+     94
+     95	003B  CD 21			     INT 21H
+     96
+     97					     ;Display the entered string
+     98	003D  BA 0063r			     MOV DX, OFFSET Act_Buf
+     99
+    100	0040  B4 09			     MOV AH, 09H
+    101
+    102	0042  CD 21			     INT 21H
+    103
+    104					     ; Display	new line
+    105
+    106	0044  BA 005Er			     MOV DX, OFFSET Break
+    107
+    108	0047  B4 09			     MOV AH,09H
+    109
+    110	0049  CD 21			     INT 21H
+    111
+    112					     ;Code to sort through string
+    113
+    114	004B  BE 0063r			     MOV SI, OFFSET Act_Buf
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 3
+lab3.asm
+
+
+
+    115
+    116	004E  8A 04		     L1:     MOV AL, [SI]
+    117
+    118					     ;compare al with lower case letters
+    119
+    120	0050  3C 61			     CMP AL, 61H	  ;LOWER CASE a
+    121
+    122	0052  72 0A			     JB	L2		  ;If AL is below 'a' it Jumps to L2
+    123
+    124	0054  3C 7A			     CMP AL, 7AH	  ;LOWER CASE z
+    125
+    126	0056  77 06			     JA	L2		  ;If AL is above 'z' it Jumps to L2
+    127
+    128	0058  FE 06 0059r		     INC CounterL
+    129
+    130	005C  EB 28			     JMP L5
+    131
+    132					     ; upper
+    133
+    134	005E  3C 41		     L2:     CMP AL, 41H	  ;CAPITAL A
+    135
+    136	0060  72 0A			     JB	L3
+    137
+    138	0062  3C 5A			     CMP AL, 5AH	  ;CAPITAL Z
+    139
+    140	0064  77 06			     JA	L3
+    141
+    142	0066  FE 06 005Ar		     INC CounterC
+    143
+    144	006A  EB 1A			     JMP L5
+    145
+    146	006C			     L3:     ;compare al with numbers
+    147
+    148	006C  3C 30			     CMP AL, 30H	  ;Number 0
+    149
+    150	006E  72 0A			     JB	L4		  ;If AL is below '0' it Jumps to L4
+    151
+    152	0070  3C 39			     CMP AL, 39H	  ;Number 9
+    153
+    154	0072  77 06			     JA	L4		  ;If AL is above '9' it Jumps to L4
+    155
+    156	0074  FF 06 005Br		     INC CounterNum
+    157
+    158	0078  EB 0C			     JMP L5
+    159
+    160	007A			     L4:     ;spaces and tabs
+    161
+    162	007A  3C 20			     CMP AL,  20H	 ;Spaces are ignored
+    163
+    164	007C  74 08			     JE	L5
+    165
+    166	007E  3C 09			     CMP AL,  09H	 ;Tabs are ignored
+    167
+    168	0080  74 04			     JE	L5
+    169
+    170	0082  FE 06 005Dr		     INC CounterSY
+    171
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 4
+lab3.asm
+
+
+
+    172	0086			     L5:     ; move forward
+    173
+    174
+    175
+    176	0086  46			     INC SI
+    177
+    178	0087  FE C9			     DEC CL
+    179
+    180	0089  80 F9 00			     CMP CL, 0
+    181
+    182	008C  74 02			     JE	L6
+    183
+    184	008E  EB BE			     JMP L1
+    185
+    186
+    187
+    188	0090			     L6:     ;Display "Capital Letter(s)"
+    189
+    190	0090  BA 0012r			     MOV DX, OFFSET CapString
+    191
+    192	0093  B4 09			     MOV AH,09H
+    193
+    194	0095  CD 21			     INT 21H
+    195
+    196	0097  8A 16 005Ar		     MOV DL, CounterC
+    197	009B  80 C2 30			     ADD DL, 30H		     ;OUTPUT A CHARACTER TO THE	SCREEN
+    198	009E  B4 02			     MOV	     AH,2
+    199	00A0  CD 21			     INT	     21H
+    200
+    201					     ; Display	new line
+    202
+    203	00A2  BA 005Er			     MOV DX, OFFSET Break
+    204
+    205	00A5  B4 09			     MOV AH,09H
+    206
+    207	00A7  CD 21			     INT 21H
+    208
+    209					     ;Display "Lower case letter(s)"
+    210
+    211	00A9  BA 0027r			     MOV DX, OFFSET SmalString
+    212
+    213	00AC  B4 09			     MOV AH,09H
+    214
+    215	00AE  CD 21			     INT 21H
+    216
+    217
+    218	00B0  8A 16 0059r		     MOV DL, CounterL
+    219	00B4  80 C2 30			     ADD DL, 30H		     ;OUTPUT A CHARACTER TO THE	SCREEN
+    220	00B7  B4 02			     MOV	     AH,2
+    221	00B9  CD 21			     INT	     21H
+    222
+    223					     ; Display	new line
+    224
+    225	00BB  BA 005Er			     MOV DX, OFFSET Break
+    226
+    227	00BE  B4 09			     MOV AH,09H
+    228
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 5
+lab3.asm
+
+
+
+    229	00C0  CD 21			     INT 21H
+    230
+    231					     ;Display "Number(s)"
+    232
+    233	00C2  BA 003Fr			     MOV DX, OFFSET NumString
+    234
+    235	00C5  B4 09			     MOV AH,09H
+    236
+    237	00C7  CD 21			     INT 21H
+    238
+    239					     ;Convert CounterNum to hex	value
+    240
+    241	00C9  A1 005Br			     MOV AX, CounterNum
+    242
+    243	00CC  D4 0A			     AAM
+    244
+    245	00CE  05 3030			     ADD AX, 3030H
+    246
+    247	00D1  BA 0000			     MOV DX, 0H
+    248
+    249	00D4  8B D8			     MOV BX, AX
+    250
+    251	00D6  8A D7			     MOV DL, BH
+    252
+    253	00D8  B4 02			     MOV AH, 02H
+    254
+    255	00DA  CD 21			     INT 21H
+    256
+    257	00DC  8A D3			     MOV DL, BL
+    258
+    259	00DE  B4 02			     MOV AH, 02H
+    260
+    261	00E0  CD 21			     INT 21H
+    262
+    263					     ; Display	new line
+    264
+    265	00E2  BA 005Er			     MOV DX, OFFSET Break
+    266
+    267	00E5  B4 09			     MOV AH,09H
+    268
+    269	00E7  CD 21			     INT 21H
+    270
+    271					     ;Display "Symbol(s)"
+    272
+    273	00E9  BA 004Cr			     MOV DX, OFFSET SYString
+    274
+    275	00EC  B4 09			     MOV AH,09H
+    276
+    277	00EE  CD 21			     INT 21H
+    278
+    279	00F0  8A 16 005Dr		     MOV DL, CounterSY
+    280
+    281	00F4  80 C2 30			     ADD DL, 30H
+    282
+    283	00F7  B4 02			     MOV AH, 02H
+    284
+    285	00F9  CD 21			     INT 21H
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 6
+lab3.asm
+
+
+
+    286
+    287
+    288
+    289
+    290
+    291				     .EXIT
+1   292	00FB  B4 4C			     MOV     AH,4Ch
+1   293	00FD  CD 21			     INT     21h
+    294
+    295	00FF			     MAIN    ENDP
+    296
+    297				     END
+Turbo Assembler	 Version 4.1	    03/07/17 12:22:03	    Page 7
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/07/17"
+??FILENAME			  Text	 "lab3	  "
+??TIME				  Text	 "12:22:03"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 _TEXT
+@CODESIZE			  Text	 0
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 LAB3
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 2
+@STACK				  Text	 DGROUP
+@STARTUP			  Near	 _TEXT:0000
+@WORDSIZE			  Text	 2
+ACT_BUF				  Byte	 DGROUP:0063
+BREAK				  Byte	 DGROUP:005E
+BUFFER				  Byte	 DGROUP:0061
+CAPSTRING			  Byte	 DGROUP:0012
+COUNTERC			  Byte	 DGROUP:005A
+COUNTERL			  Byte	 DGROUP:0059
+COUNTERNUM			  Word	 DGROUP:005B
+COUNTERSY			  Byte	 DGROUP:005D
+INSTRING			  Byte	 DGROUP:0000
+L1				  Near	 _TEXT:004E
+L2				  Near	 _TEXT:005E
+L3				  Near	 _TEXT:006C
+L4				  Near	 _TEXT:007A
+L5				  Near	 _TEXT:0086
+L6				  Near	 _TEXT:0090
+MAIN				  Far	 _TEXT:0017
+NUM				  Byte	 DGROUP:0062
+NUMSTRING			  Byte	 DGROUP:003F
+SMALSTRING			  Byte	 DGROUP:0027
+SYSTRING			  Byte	 DGROUP:004C
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  00C7 Word	  Public  DATA
+_TEXT				  16  00FF Word	  Public  CODE
+
